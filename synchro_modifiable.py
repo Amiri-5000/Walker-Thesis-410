@@ -59,12 +59,12 @@ nu_syn = np.logspace(8, 23) * u.Hz
 synch_sed = synch.sed_flux(nu_syn)
 synch_sed_ssa = synch_ssa.sed_flux(nu_syn)
 
-fig, ax = plt.subplots(figsize=(8, 6))
-plot_sed(nu_syn, synch_sed, ax=ax, color="k", label="synchr.")
-plot_sed(
-    nu_syn, synch_sed_ssa, ax=ax, ls="--", color="gray", label="self absorbed synchr."
-)
-plt.show()
+# fig, ax = plt.subplots(figsize=(8, 6))
+# plot_sed(nu_syn, synch_sed, ax=ax, color="k", label="synchr.")
+# plot_sed(
+#     nu_syn, synch_sed_ssa, ax=ax, ls="--", color="gray", label="self absorbed synchr."
+# )
+# plt.show()
 
 # simple ssc
 ssc = SynchrotronSelfCompton(blob)
@@ -76,13 +76,13 @@ nu_ssc = np.logspace(15, 30) * u.Hz
 sed_ssc = ssc.sed_flux(nu_ssc)
 sed_ssc_ssa = ssc_ssa.sed_flux(nu_ssc)
 
-fig, ax = plt.subplots(figsize=(8, 6))
+# fig, ax = plt.subplots(figsize=(8, 6))
 
-plot_sed(nu_ssc, sed_ssc, color="k", label="SSC")
-plot_sed(nu_ssc, sed_ssc_ssa, ls="--", color="gray", label="SSC with SSA")
-plt.show()
+# plot_sed(nu_ssc, sed_ssc, color="k", label="SSC")
+# plot_sed(nu_ssc, sed_ssc_ssa, ls="--", color="gray", label="SSC with SSA")
+# plt.show()
 
-Image("figure_7_4_dermer_2009.png", width=600, height=400)
+# Image("figure_7_4_dermer_2009.png", width=600, height=400)
 
 n_e = PowerLaw.from_total_energy(
     W=W_e, V=V_b, p=2.8, gamma_min=1e2, gamma_max=1e5, mass=m_e
@@ -92,39 +92,39 @@ blob2 = Blob(R_b, z, delta_D, Gamma, B, n_e=n_e)
 synch2 = Synchrotron(blob2)
 ssc2 = SynchrotronSelfCompton(blob2)
 
-fig, ax = plt.subplots(figsize=(8, 6))
+# fig, ax = plt.subplots(figsize=(8, 6))
 
-plot_sed(
-    nu_syn,
-    synch.sed_flux(nu_syn),
-    color="k",
-    label=r"${\rm synch},\,\gamma_{\rm max}=10^7$",
-)
-plot_sed(
-    nu_ssc,
-    ssc.sed_flux(nu_ssc),
-    color="k",
-    label=r"${\rm SSC},\,\gamma_{\rm max}=10^7$",
-)
-plot_sed(
-    nu_syn,
-    synch2.sed_flux(nu_syn),
-    color="crimson",
-    label=r"${\rm synch},\,\gamma_{\rm max}=10^5$",
-)
-plot_sed(
-    nu_ssc,
-    ssc2.sed_flux(nu_ssc),
-    color="crimson",
-    label=r"${\rm SSC},\,\gamma_{\rm max}=10^5$",
-)
+# plot_sed(
+#     nu_syn,
+#     synch.sed_flux(nu_syn),
+#     color="k",
+#     label=r"${\rm synch},\,\gamma_{\rm max}=10^7$",
+# )
+# plot_sed(
+#     nu_ssc,
+#     ssc.sed_flux(nu_ssc),
+#     color="k",
+#     label=r"${\rm SSC},\,\gamma_{\rm max}=10^7$",
+# )
+# plot_sed(
+#     nu_syn,
+#     synch2.sed_flux(nu_syn),
+#     color="crimson",
+#     label=r"${\rm synch},\,\gamma_{\rm max}=10^5$",
+# )
+# plot_sed(
+#     nu_ssc,
+#     ssc2.sed_flux(nu_ssc),
+#     color="crimson",
+#     label=r"${\rm SSC},\,\gamma_{\rm max}=10^5$",
+# )
 
-# select the same x and y range of the figure
-plt.xlim([1e9, 1e30])
-plt.ylim([1e-12, 1e-9])
-plt.show()
+# # select the same x and y range of the figure
+# plt.xlim([1e9, 1e30])
+# plt.ylim([1e-12, 1e-9])
+# plt.show()
 
-print(R_b.unit)
+# print(R_b.unit)
 
 
 """
@@ -143,19 +143,70 @@ for i in blobvars:
         i=float(input(f"Blob {i}?"))
     else:
         print("not true!")
-R_bi=float(input(f"Blob radius? [default: {R_b}]: "))*u.cm  #(1e16 * u.cm),
-zi=float(input(f"Blob redshift? [default: {z:.4f}]: ")) #(Distance(1e27, unit=u.cm).z),
-delta_Di=float(input(f"Doppler of jet? [default: {delta_D}]: "))
-Gammai=float(input(f"Max Lorentz factor of electrons? [default: {Gamma}]: "))
-Bi=float(input(f"Magnetic field strength? [default: {B}]: "))* u.G
-W_ei=float(input(f"Total energy distributed? [default: {W_e}]: ")) * u.Unit("erg")
+
+#testdic=dict(inp=input("test input: "),default=1e16)
+#print(f"input: {testdic["inp"]}, default: {testdic["default"]}")
+
+def inputchecker(obj):
+    while obj==obj:
+        if isinstance(obj["inp"], (float,int))==False:
+            check=input(f"{obj['name']} given not a number, will use default. Continue? Y/N: ")
+            if check=="Y":
+                obj=obj["default"]
+                print(type(obj))
+                break
+            elif check=="N":
+                if obj["unit"]!=None:
+                    unit=obj["unit"]
+                    obj=eval(input(f"{obj['name']} input? [default: {obj['default']}]: "))*unit
+                else:
+                    obj=eval(input(f"{obj['name']} input? [default: {obj['default']}]: "))
+                print(type(obj))
+            else:
+                print("Invalid.")
+        else:
+            break
+
+R_bi=dict(inp=eval('input(f"Blob radius? [default: {R_b}]: ")'),
+          default=R_b,name="Blob radius", unit=u.cm)
+inputchecker(R_bi)
+
+zi=dict(inp=eval('input(f"Blob redshift? [default: {z:.4f}]: ")'),
+        default=f'{z:.4f}',name="Blob redshift", unit=None)
+inputchecker(zi)
+
+delta_Di=dict(inp=eval('input(f"Doppler of jet? [default: {delta_D}]: ")'),
+              default=delta_D,name="Jet doppler", unit=None)
+inputchecker(delta_Di)
+
+Gammai=dict(inp=eval('input(f"Max Lorentz factor of electrons? [default: {Gamma}]: ")'),
+            default=Gamma,name="Max electrons' Lorentz factor", unit=None)
+inputchecker(Gammai)
+
+BlobGamMin=dict(inp=eval('input("fMin Lorentz factor of stream particles? [default: 1e2]: ")'),
+                default=1e2,name="Minimum stream Lorentz factor", unit=None)
+inputchecker(BlobGamMin)
+
+BlobGamMax=dict(inp=eval('input(f"Max Lorentz factor of stream particles? [default: 1e7]: ")'),
+                default=1e7,name="Maximum stream Lorentz factor", unit=None)
+inputchecker(BlobGamMax)
+
+Bi=dict(inp=eval('input(f"Magnetic field strength? [default: {B}]: ")'),
+        default=B,name="Mag. field strength", unit=u.G)
+inputchecker(Bi)
+
+W_ei=dict(inp=eval('input(f"Total energy distributed? [default: {W_e}]: ")'),
+          default=W_e,name="Distributed energy", unit=u.Unit("erg"))
+inputchecker(W_ei)
+
 V_bi=4 / 3 * np.pi * (R_bi) ** 3
 
 
 n_ealt = PowerLaw.from_total_energy(
-    W=W_ei, V=V_bi, p=2.8, gamma_min=1e2, gamma_max=1e7, mass=m_e
+    W=W_ei, V=V_bi, p=2.8, gamma_min=BlobGamMin, gamma_max=BlobGamMax, mass=m_e
 )
 bloby=Blob(R_bi, zi, delta_Di, Gammai, Bi, n_e=n_ealt)
+print(bloby.gamma_e_size)
 
 
 #synchrotron radiation calculation(?)
@@ -169,7 +220,7 @@ synch_ssa_alt = Synchrotron(bloby, ssa=True)
 ssc_alt = SynchrotronSelfCompton(bloby) 
 
 # self comp. over a self-absorbed synchrotron spectrum
-ssc_ssa_alt = SynchrotronSelfCompton(blob, ssa=True) 
+ssc_ssa_alt = SynchrotronSelfCompton(bloby, ssa=True) 
 
 #synchrotron rad. frequency
 nu_syn_alt = np.logspace(8, 23) * u.Hz 
@@ -197,14 +248,26 @@ plot_sed(
     nu_syn_alt,
     synch_alt.sed_flux(nu_syn_alt),
     color="k",
-    label=r"${\rm input_synch},\,\gamma_{\rm max}=10^7$",
+    label=r"${\rm input-synch},\,\gamma_{\rm max}=$"+f"{BlobGamMax}",
 )
 plot_sed(
     nu_ssc_alt,
     ssc_alt.sed_flux(nu_ssc_alt),
     color="k",
-    label=r"${\rm input_SSC},\,\gamma_{\rm max}=10^7$",
+    label=r"${\rm input-SSC},\,\gamma_{\rm max}=10^7$"+f"{BlobGamMax}",
 )
+
+# plot_sed(
+#     nu_syn,
+#     synch.sed_flux(nu_syn),
+#     color="k",
+#     label=r"${\rm synch},\,\gamma_{\rm max}=10^7$",
+# )
+# plot_sed(
+#     nu_ssc,
+#     ssc.sed_flux(nu_ssc),
+#     color="k",
+#     label=r"${\rm SSC},\,\gamma_{\rm max}=10^7$",
 
 
 plt.xlim([1e7, 1e30])
